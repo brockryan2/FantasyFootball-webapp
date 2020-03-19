@@ -167,17 +167,33 @@ class Player():
             del self._point_history[key]
 
         except KeyError as ke:
-            raise KeyError("Cannot delete point history for '{},' not found".format(key))
-
             logging.log_error(ke)
+            raise KeyError("Cannot delete point history for '{},' reason: not found".format(key))
 
     @property
-    def stats(self):
-        return self._stats
+    def stats(self, key=None):
+        if key is None:
+            return self._stats
+        else:
+            return self._stats[key]
 
     @stats.setter
     def stats(self, key, value):
-        self._stats[key] = value
+        temp = str(key)
+
+        if(temp.lower() in self._stats):
+            self._stats[temp.lower()] = value
+
+
+        elif(temp.upper() in self._stats):
+            self._stats[temp.upper()] = value
+
+
+        elif(temp.title() in self._stats):
+            self._stats[temp.title()] = value
+
+        else:
+            self._stats[key] = value
 
     @property
     def stat_history(self):
@@ -228,13 +244,59 @@ class Player():
 
 
 class OffensivePlayer(Player):
-    pass
+
+    def __init__(self, name, position="Offense"):
+        super().__init__(self, name, position)
+        self._stats = {
+                        "TD": 0,
+                        "Fumbles": 0
+                        "rush_attempts": 0,
+                        "rush_yards": 0,
+                        "pass_attempts": 0,
+                        "pass_yards": 0,
+                        "pass_TD": 0,
+                        "completions": 0,
+                        "interceptions": 0,
+                        "rec_attempts": 0,
+                        "receptions": 0,
+                        "rec_yards": 0,
+                        "safety": 0}
+
+    def rush(self, yards=0, attempt=1):
+        self._stats["rush_attempts"] += attempt
+        self._stats["rush_yards"] += yards
+        self._points += leagueRules.Points.rush(yards, attempt)
+
+    def _pass(self, yards=0, attempt=1, complete=False, intercepted=False, touchdown=False):
+        self._stats["pass_attempts"] += attempt
+        if complete:
+            self._stats["completions"] += 1
+            self._stats["pass_yards"] += yards
+            self._points += leagueRules.Points._pass(yards, attempt)
+
+        if intercepted:
+            self._stats["interceptions"] += 1
+            self._points += leagueRules.Points._pass_int()
+
+        if touchdown:
+            self._stats["pass_TD"] += 1
+            self._points += leagueRules.Points._pass_TD()
+
+    def reception(self, yards=0, attempt=1, complete=False):
+        self._stats["rec_attempts"] += attempt
+        if complete:
+            self._stats["receptions"] += 1
+            self._stats["rec_yards"] += yards
+            self._points += leagueRules.Points._pass(yards, attempt)
+
+    def offensive_safety(self, number=1):
+        self._stats["safety"] += number
+        self._points += leagueRules.Points.offensive_safety()
 
 
 class Quarterback(OffensivePlayer):
     def __init__(self, name):
         super().__init__(name, "QB")
         self._completions = 0
-
 
 
