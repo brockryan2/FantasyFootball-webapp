@@ -64,9 +64,8 @@ class Player():
 
     """
 
-    def __init__(self, name, ID=None, position=None, team=None, number=None, status="Healthy"):
+    def __init__(self, name, position=None, team=None, number=None, status="Healthy"):
         self._name          = name
-        self._ID            = ID
         self._position      = position
         self._team          = team
         self._number        = number
@@ -74,7 +73,7 @@ class Player():
         self._rank          = None
         self._points        = None
         self._point_history = {None: None}
-        self._stats         = {"TD": 0, "Fumbles": 0}
+        self.stats         = {"TD": 0, "Fumbles": 0}
         self._stat_history  = [None]
 
     @property
@@ -245,22 +244,22 @@ class Player():
 
 class OffensivePlayer(Player):
 
-    def __init__(self, name, position="Offense"):
-        super().__init__(self, name, position)
+    def __init__(self, name, position, team, number):
+        super().__init__(name, position=position, team=team, number=number)
         self._stats = {
-                        "TD": 0,
-                        "Fumbles": 0
-                        "rush_attempts": 0,
-                        "rush_yards": 0,
-                        "pass_attempts": 0,
-                        "pass_yards": 0,
-                        "pass_TD": 0,
-                        "completions": 0,
-                        "interceptions": 0,
-                        "rec_attempts": 0,
-                        "receptions": 0,
-                        "rec_yards": 0,
-                        "safety": 0}
+                        "TD": None,
+                        "Fumbles": None,
+                        "rush_attempts": None,
+                        "rush_yards": None,
+                        "pass_attempts": None,
+                        "pass_yards": None,
+                        "pass_TD": None,
+                        "completions": None,
+                        "interceptions": None,
+                        "rec_attempts": None,
+                        "receptions": None,
+                        "rec_yards": None,
+                        "safety": None}
 
     def rush(self, yards=0, attempt=1):
         self._stats["rush_attempts"] += attempt
@@ -295,8 +294,15 @@ class OffensivePlayer(Player):
 
 
 class Quarterback(OffensivePlayer):
-    def __init__(self, name):
-        super().__init__(name, "QB")
-        self._completions = 0
+    def __init__(self, name, team, number):
+        super().__init__(name, position="QB", team=team, number=number)
+        self.stats("QB rating", "yay!")
 
 
+
+qb1 = Quarterback(name="Joe Namath", team="NY Jets", number=999)
+
+#print(qb1)
+#print(qb1.stats)
+print("\n \n .")
+print(qb1.__dict__)
