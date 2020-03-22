@@ -1,3 +1,21 @@
+#from leagueRules import Stats, Points
+#from logging import *
+
+class Stats():
+  def __init__(self, player):
+    self.TD = 0
+    self.fumbles = 0
+
+    if hasattr(player, 'position'):
+        print("{} object has position attribute? == TRUE!!".format(type(player)))
+        if getattr(player, 'position') == "RB":
+            print("Runningback")
+            self.rush_yards = 0
+
+        if getattr(player, 'position') == "QB":
+            print("Quarterback")
+            self.pass_yards = 0
+            self.qb_rating = 0
 
 class Player():
     """
@@ -73,7 +91,7 @@ class Player():
         self._rank          = None
         self._points        = None
         self._point_history = {None: None}
-        self.stats         = {"TD": 0, "Fumbles": 0}
+        self.stats          = Stats(self)
         self._stat_history  = [None]
 
     @property
@@ -169,30 +187,17 @@ class Player():
             logging.log_error(ke)
             raise KeyError("Cannot delete point history for '{},' reason: not found".format(key))
 
-    @property
-    def stats(self, key=None):
-        if key is None:
-            return self._stats
-        else:
-            return self._stats[key]
-
-    @stats.setter
-    def stats(self, key, value):
-        temp = str(key)
-
-        if(temp.lower() in self._stats):
-            self._stats[temp.lower()] = value
-
-
-        elif(temp.upper() in self._stats):
-            self._stats[temp.upper()] = value
-
-
-        elif(temp.title() in self._stats):
-            self._stats[temp.title()] = value
+    def get_stat(self, stat=None):
+        if stat == None:
+            return self.stats.__dict__
 
         else:
-            self._stats[key] = value
+            try:
+                return stat, self.stats.__dict__[stat]
+
+            except KeyError as ke:
+                logging.log_error(ke)
+                raise KeyError("stat '{}' does not exist for player type '{}'".format(stat, type(self)))
 
     @property
     def stat_history(self):
@@ -296,13 +301,29 @@ class OffensivePlayer(Player):
 class Quarterback(OffensivePlayer):
     def __init__(self, name, team, number):
         super().__init__(name, position="QB", team=team, number=number)
-        self.stats("QB rating", "yay!")
+
+class Runningback(OffensivePlayer):
+    def __init__(self, name, team, number):
+        super().__init__(name, position="RB", team=team, number=number)
 
 
 
-qb1 = Quarterback(name="Joe Namath", team="NY Jets", number=999)
+
+qb1 = Quarterback(name="Joe Namath", team="NY Jets", number=12)
+
+print(qb1.get_stat())
+print("\n")
+print(qb1.get_stat('qb_rating'))
+
+rb1 = Runningback(name="Reggie Bush", team="NO Saints", number=25)
+
+print(rb1.get_stat())
+print("\n")
+print(rb1.get_stat('rush_yards'))
+
+#print(rb1.get_stat('qb_rating'))
 
 #print(qb1)
 #print(qb1.stats)
-print("\n \n .")
-print(qb1.__dict__)
+#print("\n \n .")
+#print(qb1.__dict__)
