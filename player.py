@@ -7,10 +7,11 @@ class Stats():
     self.fumbles = 0
 
     if hasattr(player, 'position'):
-        print("{} object has position attribute? == TRUE!!".format(type(player)))
         if getattr(player, 'position') == "RB":
             print("Runningback")
             self.rush_yards = 0
+            self.rush_att   = 0
+            self.
 
         if getattr(player, 'position') == "QB":
             print("Quarterback")
