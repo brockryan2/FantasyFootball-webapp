@@ -1,5 +1,6 @@
 #from leagueRules import Stats, Points
 #from logging import *
+from stats import Stats
 
 class Player():
     """
@@ -66,9 +67,10 @@ class Player():
 
     """
 
-    def __init__(self, name, position=None, team=None, number=None, status="Healthy"):
+    def __init__(self, name, position=None, position_type="Offense", team=None, number=None, status="Healthy"):
         self._name          = name
         self._position      = position
+        self._position_type = position_type
         self._team          = team
         self._number        = number
         self._status        = status
@@ -230,25 +232,10 @@ class Player():
         self._points += leagueRules.Points.fumble()
 
 
-
 class OffensivePlayer(Player):
 
     def __init__(self, name, position, team, number):
         super().__init__(name, position=position, team=team, number=number)
-        self._stats = {
-                        "TD": None,
-                        "Fumbles": None,
-                        "rush_attempts": None,
-                        "rush_yards": None,
-                        "pass_attempts": None,
-                        "pass_yards": None,
-                        "pass_TD": None,
-                        "completions": None,
-                        "interceptions": None,
-                        "rec_attempts": None,
-                        "receptions": None,
-                        "rec_yards": None,
-                        "safety": None}
 
     def rush(self, yards=0, attempt=1):
         self._stats["rush_attempts"] += attempt
@@ -289,25 +276,3 @@ class Quarterback(OffensivePlayer):
 class Runningback(OffensivePlayer):
     def __init__(self, name, team, number):
         super().__init__(name, position="RB", team=team, number=number)
-
-
-
-
-qb1 = Quarterback(name="Joe Namath", team="NY Jets", number=12)
-
-print(qb1.get_stat())
-print("\n")
-print(qb1.get_stat('qb_rating'))
-
-rb1 = Runningback(name="Reggie Bush", team="NO Saints", number=25)
-
-print(rb1.get_stat())
-print("\n")
-print(rb1.get_stat('rush_yards'))
-
-#print(rb1.get_stat('qb_rating'))
-
-#print(qb1)
-#print(qb1.stats)
-#print("\n \n .")
-#print(qb1.__dict__)
