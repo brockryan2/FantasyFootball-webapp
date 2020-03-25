@@ -67,8 +67,9 @@ class Player():
 
     """
 
-    def __init__(self, name, position=None, position_type="Offense", team=None, number=None, status="Healthy"):
+    def __init__(self, name, sport=None, position=None, position_type="Offense", team=None, number=None, status="Healthy"):
         self._name          = name
+        self._sport         = sport
         self._position      = position
         self._position_type = position_type
         self._team          = team
@@ -77,7 +78,7 @@ class Player():
         self._rank          = None
         self._points        = None
         self._point_history = {None: None}
-        self.stats          = Stats(self)
+        self.stats          = Stats(self, self._sport)
         self._stat_history  = [None]
 
     @property
