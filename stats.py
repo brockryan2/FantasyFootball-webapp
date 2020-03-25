@@ -1,10 +1,10 @@
 
 class Stats():
     def __init__(self, player, sport):
-        self.TD = 0
-        self.fumbles = 0
 
         if sport == 'football':
+            self.TD = 0
+            self.fumbles = 0
 
             if hasattr(player, '_position_type') and getattr(player, '_position_type') == "Offense":
                 self.rush_attempts      = None
