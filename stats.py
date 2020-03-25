@@ -5,7 +5,6 @@ class Stats():
         self.fumbles = 0
 
         if hasattr(player, '_position_type') and getattr(player, '_position_type') == "Offense":
-            print("this is working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             self.rush_attempts      = None
             self.rush_yards         = None
             self.pass_attempts      = None
