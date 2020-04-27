@@ -18,85 +18,118 @@ def is_empty(var):
 class Name():
 
     def __init__(self, *args, attributes=None, values=None, pair_flag=True):
-        print(values[0])
+        num_attributes_added      = 0
+        num_attributes_not_added  = 0
+        attributes_not_added_list = []
 
-        if attributes is not None and is_iterable(attributes):
+        if len(args) == 1 and type(args[0]) is dict and attributes is None and values is None:
+            self.__dict__ = args[0]
+            num_attributes_added = len(args[0])
+
+        elif len(args) == 1 and type(args[0]) is dict:
+            for k, v in args[0].items():
+                self.__dict__[k] = v
+                num_attributes_added += 1
+
+
+        if attributes is not None and values is not None and is_iterable(attributes) and is_iterable(values):
             zipped = zip_longest(attributes, values, fillvalue=None)
+
             for attribute, value in zipped:
-                print("attribute = ", attribute, " |  value = ", value)
-                self.__dict__[attribute] = value
+                if is_hashable(attribute):
+                    self.__dict__[attribute] = value
+                    num_attributes_added += 1
 
-        else:
-            num_args = len(args)
+                else:
+                    num_attributes_not_added += 1
+                    attributes_not_added_list.append({'attribute': attribute, 'value': value})
+                    continue
 
-            if num_items_is_even(num_args) and pair_flag:
+        elif attributes is None and values is None and not num_items_is_even(len(args)):
+            for arg in args:
+                if is_hashable(arg):
+                    self.__dict__[arg] = None
+                    num_attributes_added += 1
 
-                for i in range(0, num_args, 2):
-                    if is_hashable(args[i]):
-                        self.__dict__[args[i]] = args[i + 1]
+                elif not is_hashable(arg) and is_iterable(arg):
+                    for item in arg:
+                        if is_hashable(item):
+                            self.__dict__[item] = None
+                            num_attributes_added += 1
 
-                    else:
-                        if is_iterable(args[i]):
-                            for n in range(0, len(args[i])):
-                                if is_hashable(args[i][n]) and is_hashable(args[i][n+1]):
-                                    self.__dict__[args[i][n]] = args[i][n + 1]
+                else:
+                    num_attributes_not_added += 1
+                    attributes_not_added_list.append({'attribute': arg, 'value': None})
+                    continue
 
-                                else:
-                                    self.__dict__[None] = args[i][n]
+        elif attributes is None and values is None and num_items_is_even(len(args)) and pair_flag:
+            for i in range(0, len(args), 2):
+                if is_hashable(args[i]):
+                    try:
+                        self.__dict__[args[i]] = args[i+1]
+                        num_attributes_added += 1
 
-            #else:
-                #self.__dict__[item] = None
-
-            else:
-                for arg in args:
-                    if is_iterable(arg) and is_empty(arg):
+                    except IndexError:
+                        num_attributes_not_added += 1
+                        attributes_not_added_list.append({'attribute': args[i], 'value': None})
                         continue
 
-                    elif type(arg) is dict:
-                        self.__dict__ = arg
+                elif not is_hashable(args[i]) and is_iterable(args[i]):
+                    for item in args[i]:
+                        if is_hashable(item):
+                            try:
+                                self.__dict__[item] = args[i+1]
+                                num_attributes_added += 1
 
-                    elif type(arg) is str:
-                        self.__dict__[arg] = None
+                            except IndexError:
+                                num_attributes_not_added += 1
+                                attributes_not_added_list.append({'attribute': args[i], 'value': None})
+                                continue
 
-                    elif len(arg) % 2 == 0:
-                        for i in range(0, len(arg), 2):
-                            self.__dict__[arg[i]] = arg[i + 1]
+                        else:
+                            num_attributes_not_added += 1
+                            attributes_not_added_list.append({'attribute': arg, 'value': None})
+                            continue
 
-                    else:
-                        for item in arg:
-                            if hasattr(item, '__iter__') and len(item) % 2 == 0:
-                                for i in range(0, len(item), 2):
-                                    self.__dict__[item[i]] = item[i + 1]
+                else:
+                    num_attributes_not_added += 1
+                    attributes_not_added_list.append({'attribute': arg, 'value': None})
+                    continue
 
-                            elif is_iterable(item) and not is_hashable(item):
-                                for i in item:
-                                    self.__dict__[i] = None
+        if num_attributes_not_added: #if num_attributes_not_added > 0
+            print("Successfully added {0} attribute(s)!  The following {1} attribute(s) could not be added:\n{2}".format(num_attributes_added, num_attributes_not_added, attributes_not_added_list))
+        else:
+            print("{} attribute(s) added successfully!".format(num_attributes_added))
 
-                            else:
-                                self.__dict__[None] = None
-                #else:
-                    #self.__dict__[arg] = None
 
-#a = Name("Bob")
-#print(a.__dict__)
-#
-#b = Name("Bob", "cat")
-#print(b.__dict__)
-#
-#c = Name(['type', 'null', 'category', 'I don\'t know'])
-#print(c.__dict__)
-#
-#d = Name({'one':1, 'two': 2})
-#print(d.__dict__)
-#
-##e = Name([1,2,3],'apple', "monkey", ('see', 'do'))
-##print(e.__dict__)
-#
-#f = Name(attributes=['ten', 'nine', 'eight'], values=['10', '9'])
-#print(f.__dict__)
+def main():
 
-tuple1 = ("this is an attribute", "Truthy", 1, 0.01, False, b'\xf0\xf1\xf2')
-list_1 = ["yay", "fAlSe", 0, 0.99, 'TrUe']
+    a = Name("Bob")
+    print(a.__dict__)
 
-complex_example = Name(attributes=(tuple1), values=list_1)
-print(complex_example.__dict__)
+    b = Name("Bob", "cat")
+    print(b.__dict__)
+
+    c = Name(['type', 'null', 'category', 'I don\'t know'])
+    print(c.__dict__)
+
+    d = Name({'one':1, 'two': 2}) # this test currently passing, but printing incorrect number of attributes added (a/o 4/26/2020)
+    print(d.__dict__)
+
+    e = Name([1,2,3],'apple', "monkey", ('see', 'do'))
+    print(e.__dict__)
+
+    f = Name(attributes=['ten', 'nine', 'eight'], values=['10', '9'])
+    print(f.__dict__)
+
+    tuple1 = ("this is an attribute", "Truthy", 1, 0.01, 'Falseyy')
+    list_1 = ["yay", "fAlSe", 0, 0.99, 'TrUe', 'more values than attributes', 'uh-oh, there\'s more values, but no more attributes']
+    dict_1 = {'attribute1': 1.0, 'attribute2': [2, 2.0], 'attribute3': "3"}
+
+    complex_example = Name(dict_1, attributes=(tuple1), values=list_1)
+    print(complex_example.__dict__)
+
+    print(complex_example.attribute2)
+
+if __name__ == '__main__':
+    main()
